@@ -1,7 +1,7 @@
 docker-nethack-server
 ======================
 
-Dockerfile for Public JNetHack server
+Dockerfile for Public NetHack server
 
 ## Howto
 
