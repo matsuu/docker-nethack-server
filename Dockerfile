@@ -4,7 +4,7 @@ RUN \
   apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y autoconf bison \
     bsdmainutils flex gcc git groff libncursesw5-dev libsqlite3-dev make \
-    ncurses-dev sqlite3 tar telnetd-ssl wget xinetd && \
+    ncurses-dev sqlite3 tar telnetd-ssl xinetd && \
   apt-get clean
 
 RUN locale-gen ja_JP.UTF-8
@@ -15,7 +15,10 @@ RUN git clone git://github.com/paxed/dgamelaunch.git && \
     -e "s/-lrt/-lrt -pthread/" \
     configure.ac && \
   sed -i \
-    -e "/^maxnicklen/s/=.*/= 16/" \
+    -e "/^maxnicklen/s/=.*/= 20/" \
+    -e "/game_\(path\|args\)/s/nethack/nethack.343-nao/" \
+    -e "/^commands\[\(register\|login\)\]/s/=\(.*\)/= mkdir \"%ruserdata\/%N\",\n\1/" \
+    -e "s:/%n:/%N/%n:" \
     examples/dgamelaunch.conf && \
   ./autogen.sh \
     --enable-sqlite \
@@ -26,49 +29,21 @@ RUN git clone git://github.com/paxed/dgamelaunch.git && \
   cd .. && \
   rm -rf dgamelaunch
 
-RUN \
-  wget \
-    http://sourceforge.net/projects/nethack/files/nethack/3.4.3/nethack-343-src.tgz && \
-  tar zxf nethack-343-src.tgz && \
-  cd nethack-3.4.3 && \
-  sh sys/unix/setup.sh x && \
+RUN git clone http://alt.org/nethack/nh343-nao.git && \
+  cd nh343-nao && \
   sed -i \
     -e "/^CFLAGS/s/-O/-O2 -fomit-frame-pointer/" \
-    -e "/^WINTTYLIB/s/=.*/= -lncurses/" \
     sys/unix/Makefile.src && \
   sed -i \
-    -e "/^CFLAGS/s/-O/-O2 -fomit-frame-pointer/" \
-    -e "/^YACC /s/=.*/= bison -y/" \
-    sys/unix/Makefile.utl && \
-  sed -i \
     -e "/rmdir \.\/-p/d" \
-    -e "/^PREFIX/s:=.*:= /opt/nethack/nethack.alt.org:" \
-    -e "/^GAMEDIR/s:=.*:= \$(PREFIX)/nh343:" \
-    -e "/^VARDIR/s:=.*:= \$(GAMEDIR)/var:" \
-    -e "/^GAMEGRP/s:=.*:= games:" \
     sys/unix/Makefile.top && \
   sed -i \
-    -e "/define HACKDIR/s:\".*\":\"/nh343\":" \
-    -e "/define COMPRESS /s:\".*\":\"/bin/gzip\":" \
-    include/config.h && \
-  sed -i \
-    -e "s:/\* \(#define\s*\(SYSV\|LINUX\|TERMINFO\|TIMED_DELAY\)\)\s*\*/:\1:" \
-    -e "s:/\* \(#define VAR_PLAYGROUND\).*:\1 \"/nh343/var\":" \
-    include/unixconf.h && \
-  sed -i \
-    -e "/^enter_explore_mode()/a {return 0;}\nSTATIC_PTR int _enter_explore_mode()" \
-    src/cmd.c && \
-  sed -i \
-    -e "/^#define ENTRYMAX/s/100/10000/" \
-    -e "/^#define NAMSZ/s/10/16/" \
-    -e "/^#define PERS_IS_UID/d" \
-    src/topten.c && \
+    -e "/^CFLAGS/s/-O/-O2 -fomit-frame-pointer/" \
+    sys/unix/Makefile.utl && \
   make all && \
   make install && \
   cd .. && \
-  rm -rf \
-    nethack-3.4.3 \
-    nethack-343-src.tgz
+  rm -rf nh343-nao
 
 RUN tar cf - \
   /lib/x86_64-linux-gnu/libncurses* \
