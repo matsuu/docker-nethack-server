@@ -1,13 +1,13 @@
-FROM ubuntu
+FROM debian
 
 RUN \
   apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y autoconf bison \
     bsdmainutils flex gcc git groff libncursesw5-dev libsqlite3-dev make \
-    ncurses-dev sqlite3 tar telnetd-ssl xinetd && \
+    ncurses-dev sqlite3 tar telnetd-ssl xinetd locales && \
   apt-get clean
 
-RUN locale-gen ja_JP.UTF-8
+RUN locale-gen en_US.UTF-8
 
 RUN git clone git://github.com/paxed/dgamelaunch.git && \
   cd dgamelaunch && \
