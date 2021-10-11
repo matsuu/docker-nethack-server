@@ -32,13 +32,13 @@ RUN git clone git://github.com/paxed/dgamelaunch.git && \
 RUN git clone http://alt.org/nethack/nh343-nao.git && \
   cd nh343-nao && \
   sed -i \
-    -e "/^CFLAGS/s/-O/-O2 -fomit-frame-pointer/" \
+    -e "/^CFLAGS/s/-O/-O2 -fomit-frame-pointer -fcommon/" \
     sys/unix/Makefile.src && \
   sed -i \
     -e "/rmdir \.\/-p/d" \
     sys/unix/Makefile.top && \
   sed -i \
-    -e "/^CFLAGS/s/-O/-O2 -fomit-frame-pointer/" \
+    -e "/^CFLAGS/s/-O/-O2 -fomit-frame-pointer -fcommon/" \
     sys/unix/Makefile.utl && \
   make all && \
   make install && \
